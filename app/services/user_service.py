@@ -10,6 +10,10 @@ def get_user_by_username(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
 
+def verify_user_by_username_filenum(db: Session, username: str, filenum: int):
+    return db.query(User).filter(User.username == username and User.file_num == filenum).first()
+
+
 def get_user_by_file_num(db: Session, file_num_user: int):
     return db.query(User).filter(User.file_num == file_num_user).first()
 

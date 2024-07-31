@@ -30,5 +30,9 @@ class User(CreateUserRequest):
         arbitrary_types_allowed = True
 
 
-class ResponseUserDataToken(User):
+class UserDataToken(User):
     token: Token
+
+
+class ResponseUserDataToken(BaseModel):
+    user: UserDataToken

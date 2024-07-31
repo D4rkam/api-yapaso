@@ -3,13 +3,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from typing import Annotated
 
-from schemas.user_schema import CreateUserRequest, UserLogin, ResponseUserDataToken
+from schemas.user_schema import CreateUserRequest, UserLogin, ResponseUserDataToken, UserDataToken
 from models.user_model import User
 from schemas.token_schema import Token
 from dependencies import db_dependency
 from services.auth_service import authenticate_user, create_access_token
 from security import bcrypt_context
-from services.user_service import get_user_by_username
+from services.user_service import get_user_by_username, get_user_by_file_num
 
 router = APIRouter(
     prefix="/auth",
@@ -19,11 +19,18 @@ router = APIRouter(
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    db_user = get_user_by_username(db, username=create_user_request.username)
+    db_user_by_username = get_user_by_username(
+        db, create_user_request.username)
 
-    if db_user:
+    db_user_by_filenum = get_user_by_file_num(db, create_user_request.file_num)
+
+    if db_user_by_username:
         raise HTTPException(
             status_code=400, detail="El nombre de usuario ya existe")
+
+    if db_user_by_filenum:
+        raise HTTPException(
+            status_code=400, detail="El numero de legajo ya existe")
 
     create_user_model = User(
         name=create_user_request.name,
@@ -45,7 +52,7 @@ async def login_for_access_token(form_user: UserLogin, db: db_dependency):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no valido")
     token = create_access_token(
         form_user.username, form_user.id, timedelta(minutes=20))
-    user_data = ResponseUserDataToken(
+    user_data = UserDataToken(
         id=form_user.id,
         name=form_user.name,
         last_name=form_user.last_name,
@@ -55,4 +62,4 @@ async def login_for_access_token(form_user: UserLogin, db: db_dependency):
         orders=form_user.orders,
         token=Token(access_token=token,
                     token_type="bearer"),)
-    return user_data
+    return ResponseUserDataToken(user=user_data)
