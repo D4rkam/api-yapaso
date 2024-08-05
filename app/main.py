@@ -22,7 +22,7 @@ app.include_router(prefix="/api", router=router_order)
 app.include_router(prefix="/api", router=router_product)
 app.separate_input_output_schemas = True
 
-Base.metadata.drop_all(bind=engine)
+# Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app.title = "Ya Paso API"

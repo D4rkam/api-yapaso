@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=Product)
+@router.get("/{product_id}", response_model=Product)
 async def get_product(db: db_dependency, user: user_dependency, product_id: int):
     return get_product_by_id(db, product_id)
 
