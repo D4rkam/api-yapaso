@@ -10,6 +10,7 @@ class CreateUserRequest(BaseModel):
     username: str
     password: str
     file_num: str
+    # balance: float = 0
 
     class Config:
         from_attributes = True
@@ -24,6 +25,8 @@ class UserLogin(BaseModel):
 class User(CreateUserRequest):
     id: int
     orders: List[Order]
+    balance: float
+    role: str
 
     class Config:
         from_attributes = True
