@@ -25,7 +25,7 @@ def get_db():
 db_dependency = Annotated[Session, Depends(get_db)]
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db_dependency):
+async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer)):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY,
                              algorithms=[settings.ALGORITHM])
@@ -45,3 +45,12 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)], db: db
     except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="No se pudo validar el usuario.")
+
+
+def verify_roles(roles: list[str]):
+    def role_dependecy(current_user: User = Depends(get_current_user)):
+        if current_user.role not in roles:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                                detail="No tienes permiso para acceder a esta ruta")
+        return current_user
+    return role_dependecy

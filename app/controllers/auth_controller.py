@@ -1,7 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, HTTPException, status
 from datetime import timedelta
-from typing import Annotated
 
 from schemas.user_schema import CreateUserRequest, UserLogin, ResponseUserDataToken, UserDataToken
 from models.user_model import User
@@ -51,7 +49,7 @@ async def login_for_access_token(form_user: UserLogin, db: db_dependency):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no valido")
     token = create_access_token(
-        form_user.username, form_user.id, timedelta(minutes=20))
+        form_user.username, form_user.id, timedelta(days=30))
     user_data = UserDataToken(
         id=form_user.id,
         name=form_user.name,
@@ -60,6 +58,9 @@ async def login_for_access_token(form_user: UserLogin, db: db_dependency):
         password=form_user.hashed_password,
         file_num=str(form_user.file_num),
         orders=form_user.orders,
+        balance=form_user.balance,
         token=Token(access_token=token,
-                    token_type="bearer"),)
+                    token_type="bearer"),
+        role=form_user.role
+    )
     return ResponseUserDataToken(user=user_data)
