@@ -7,6 +7,10 @@ from schemas.order_schema import OrderCreate
 
 
 def get_orders(db: Session, skip: int = 0, limit: int = 100):
+    """
+    Esta funcion retorna todos los pedidos de la base de datos.
+    Esencial para el buffet
+    """
     return db.query(Order).offset(skip).limit(limit).all()
 
 

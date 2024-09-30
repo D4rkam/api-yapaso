@@ -27,3 +27,6 @@ class Order(Base):
     products = relationship(
         "Product", secondary=order_products, back_populates="orders"
     )
+
+    seller_id: Mapped[int] = Column(Integer, ForeignKey("sellers.id"))
+    seller = relationship("Seller", back_populates="orders")

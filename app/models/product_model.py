@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column, Integer, String, Float, Text
+from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.ext.declarative import declared_attr
 from firebase.firebase_storage import bucket
@@ -23,6 +23,9 @@ class Product(Base):
     orders = relationship(
         "Order", secondary=order_products, back_populates="products"
     )
+
+    seller_id: Mapped[int] = Column(Integer, ForeignKey("sellers.id"))
+    seller = relationship("Seller", back_populates="products")
 
     @declared_attr
     def __mapper_args__(cls):
