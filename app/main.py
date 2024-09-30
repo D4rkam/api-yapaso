@@ -4,6 +4,7 @@ from controllers.auth_controller import router as router_auth
 from controllers.user_controller import router as router_user
 from controllers.order_controller import router as router_order
 from controllers.product_controller import router as router_product
+from controllers.pay_controller import router as router_pay
 from database import engine, Base
 
 
@@ -20,9 +21,10 @@ app.include_router(prefix="/api", router=router_auth)
 app.include_router(prefix="/api", router=router_user)
 app.include_router(prefix="/api", router=router_order)
 app.include_router(prefix="/api", router=router_product)
-app.separate_input_output_schemas = True
+app.include_router(prefix="/api", router=router_pay)
+# app.separate_input_output_schemas = True
 
-# Base.metadata.drop_all(bind=engine)
+# Base.metadata.drop_all(bind=engine)   
 Base.metadata.create_all(bind=engine)
 
 app.title = "Ya Paso API"
