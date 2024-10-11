@@ -21,5 +21,5 @@ class User(Base):
 
     balance: Mapped[float] = Column(Float, default=0)
 
-    orders = relationship("Order", back_populates="user",
-                          cascade="all, delete-orphan")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="user",  # type: ignore
+                                                 cascade="all, delete-orphan")

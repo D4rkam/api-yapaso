@@ -47,6 +47,27 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer
                             detail="No se pudo validar el usuario.")
 
 
+async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bearer)):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY,
+                             algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        seller_id: int = payload.get("id")
+        if email is None or seller_id is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="No es un vendedor valido.")
+        seller = db.query(User).filter(User.id == seller_id).first()
+
+        if seller is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Vendedor no encontrado.")
+
+        return seller
+    except jwt.JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="No se pudo validar el vendedor.")
+
+
 def verify_roles(roles: list[str]):
     def role_dependecy(current_user: User = Depends(get_current_user)):
         if current_user.role not in roles:

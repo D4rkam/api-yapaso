@@ -20,12 +20,13 @@ class Product(Base):
     image_url: Mapped[str | None] = Column(String(255), nullable=True)
     quantity: Mapped[int] = Column(Integer, default=1)
 
-    orders = relationship(
+    orders: Mapped[list["Order"]] = relationship(  # type: ignore
         "Order", secondary=order_products, back_populates="products"
     )
 
     seller_id: Mapped[int] = Column(Integer, ForeignKey("sellers.id"))
-    seller = relationship("Seller", back_populates="products")
+    seller: Mapped["Seller"] = relationship(  # type: ignore
+        "Seller", back_populates="products")
 
     @declared_attr
     def __mapper_args__(cls):

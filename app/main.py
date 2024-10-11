@@ -24,7 +24,7 @@ app.include_router(prefix="/api", router=router_product)
 app.include_router(prefix="/api", router=router_pay)
 # app.separate_input_output_schemas = True
 
-# Base.metadata.drop_all(bind=engine)   
+# Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 
 app.title = "Ya Paso API"
@@ -32,7 +32,7 @@ app.title = "Ya Paso API"
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def home():
-    return {"Gretting": "Bienvenido al test de API de Ya Paso"}
+    return {"Gretting": "Bienvenido a la API de Ya Paso"}
 
 
 if __name__ == "__main__":

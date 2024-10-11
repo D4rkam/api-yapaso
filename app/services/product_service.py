@@ -14,8 +14,9 @@ def get_products(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Product).offset(skip).limit(limit).all()
 
 
-def create_product_db(db: Session, product: ProductCreate, image_file: UploadFile):
+def create_product_db(db: Session, product: ProductCreate, seller_id: int, image_file: UploadFile):
     data_product = product.model_dump()
+    data_product["seller_id"] = seller_id
 
     # Subir archivo a Firebase Storage
     blob = bucket.blob(f"products/{image_file.filename}")

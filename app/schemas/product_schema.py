@@ -19,6 +19,7 @@ class ProductCreate(ProductBase):
 
 class Product(ProductBase):
     id: int
+    seller_id: int
 
     class Config:
         arbitrary_types_allowed = True
