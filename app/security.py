@@ -8,6 +8,7 @@ from models.order_model import Order
 from database import SessionLocal
 from config import settings
 from models.user_model import User
+from models.seller_model import Seller
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"])
@@ -48,6 +49,7 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer
 
 
 async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bearer)):
+    print(settings.SECRET_KEY)
     try:
         payload = jwt.decode(token, settings.SECRET_KEY,
                              algorithms=[settings.ALGORITHM])
@@ -56,12 +58,11 @@ async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bear
         if email is None or seller_id is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail="No es un vendedor valido.")
-        seller = db.query(User).filter(User.id == seller_id).first()
+        seller = db.query(Seller).filter(Seller.id == seller_id).first()
 
         if seller is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Vendedor no encontrado.")
-
         return seller
     except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,

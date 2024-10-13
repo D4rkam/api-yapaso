@@ -15,12 +15,12 @@ router = APIRouter(
 
 
 @router.get("/{product_id}", response_model=Product)
-async def get_product(db: db_dependency, product_id: int, current_user: Seller = Depends(verify_roles(["user", "seller"]))):
+async def get_product(db: db_dependency, product_id: int, current_user: seller_dependency):
     return get_product_by_id(db, product_id)
 
 
-@router.get("/all", response_model=List[Product])
-async def get_products_list(db: db_dependency, current_user: Seller = Depends(verify_roles(["seller"]))):
+@router.get("/", response_model=List[Product])
+async def get_products_list(db: db_dependency, current_user: seller_dependency):
     return get_products(db)
 
 
@@ -39,5 +39,5 @@ async def create(db: db_dependency,
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_200_OK)
-async def delete(db: db_dependency, product_id: int, current_user: Seller = Depends(verify_roles(["seller"]))):
+async def delete(db: db_dependency, product_id: int, current_user: seller_dependency):
     return delete_product(db, product_id)
