@@ -13,7 +13,7 @@ class OrderBase(BaseModel):
 
 
 class OrderCreate(OrderBase):
-    datetime_order: datetime
+    datetime_order: str
 
 
 class Order(OrderBase):

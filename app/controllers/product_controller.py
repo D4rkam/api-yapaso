@@ -20,7 +20,7 @@ async def get_product(db: db_dependency, product_id: int, current_user: seller_d
 
 
 @router.get("/", response_model=List[Product])
-async def get_products_list(db: db_dependency, current_user: seller_dependency):
+async def get_products_list(db: db_dependency, current_user: user_dependency):
     return get_products(db)
 
 
@@ -31,7 +31,7 @@ async def create(db: db_dependency,
                  desc_product: str = Form(...),
                  price_product: float = Form(...),
                  quantity_product: int = Form(...),
-                 file: UploadFile = File(...),):
+                 file: UploadFile = File(...)):
 
     product_model = ProductCreate(
         name=name_product, description=desc_product, price=price_product, quantity=quantity_product)
