@@ -36,5 +36,4 @@ def create_access_token_seller(email: str, seller_id: int, expires_delta: timede
     encode = {"sub": email, "id": seller_id}
     expires = datetime.utcnow() + expires_delta
     encode.update({"exp": expires})
-    print(settings.SECRET_KEY)
     return jwt.encode(encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

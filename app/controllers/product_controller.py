@@ -29,7 +29,7 @@ async def create(db: db_dependency,
                  current_user: seller_dependency,
                  name_product: str = Form(...),
                  desc_product: str = Form(...),
-                 price_product: float = Form(...),
+                 price_product: int = Form(...),
                  quantity_product: int = Form(...),
                  file: UploadFile = File(...)):
 

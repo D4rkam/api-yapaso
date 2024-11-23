@@ -9,6 +9,9 @@ def create_preference_products(request: list[Item], access_token: str):
     sdk = mercadopago.SDK(access_token)
     preference_data = PreferenceProductsRequest(items=request)
     preference_response = sdk.preference().create(preference_data.model_dump())
+    if preference_response["status"] == 400:
+        raise HTTPException(
+            status_code=400, detail=preference_response["response"])
     if preference_response["status"] == 201:
         return preference_response["response"]
 

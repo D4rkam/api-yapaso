@@ -19,7 +19,7 @@ class User(Base):
 
     role: Mapped[str] = Column(String(10), default="user")
 
-    balance: Mapped[float] = Column(Float, default=0)
+    balance: Mapped[int] = Column(Integer, default=0)
 
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="user",  # type: ignore
                                                  cascade="all, delete-orphan")

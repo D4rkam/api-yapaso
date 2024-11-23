@@ -25,7 +25,7 @@ class UserLogin(BaseModel):
 class User(CreateUserRequest):
     id: int
     orders: List[Order]
-    balance: float
+    balance: int
     role: str
 
     class Config:

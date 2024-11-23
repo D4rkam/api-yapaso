@@ -16,7 +16,7 @@ class Product(Base):
     id: Mapped[int] = Column(Integer, primary_key=True, index=True)
     name: Mapped[str] = Column(String(100), index=True)
     description: Mapped[str] = Column(Text, index=True)
-    price: Mapped[float] = Column(Float, nullable=False)
+    price: Mapped[int] = Column(Float, nullable=False)
     image_url: Mapped[str | None] = Column(String(255), nullable=True)
     quantity: Mapped[int] = Column(Integer, default=1)
 

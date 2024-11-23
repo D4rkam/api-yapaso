@@ -21,7 +21,7 @@ class PreferenceProductsRequest(BaseModel):
         "name": "Agustina",
         "surname": "Moreira",
         "email": "moreiraagustina886@gmail.com"
-    },
+    }
 
     class Config:
         arbitrary_types_allowed = True
