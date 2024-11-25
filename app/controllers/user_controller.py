@@ -15,9 +15,10 @@ router = APIRouter(
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
-async def user(db: db_dependency, current_user: User = Depends(verify_roles(["user"]))):
+async def user(db: db_dependency, current_user: user_dependency):
     if current_user is None:
         raise HTTPException(status_code=401, detail="Fallo la autenticación")
+
     return {"User": current_user}
 
 
@@ -32,10 +33,10 @@ async def user_for_username(db: db_dependency, username: str, current_user: User
 
 
 @router.put("/balance/add")
-async def update_add_balance(db: db_dependency, current_user: User = Depends(verify_roles(["user"]))):
+async def update_add_balance(db: db_dependency, current_user: user_dependency):
     return add_balance(db, current_user.id)
 
 
 @router.put("/balance/substract")
-async def update_substract_balance(db: db_dependency, current_user: User = Depends(verify_roles(["user"]))):
+async def update_substract_balance(db: db_dependency, current_user: user_dependency):
     return substract_balance(db, current_user.id)

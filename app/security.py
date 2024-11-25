@@ -42,14 +42,13 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuario no encontrado.")
 
-        return user
+        return user.__dict__
     except jwt.JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail="No se pudo validar el usuario.")
 
 
 async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bearer)):
-    print(settings.SECRET_KEY)
     try:
         payload = jwt.decode(token, settings.SECRET_KEY,
                              algorithms=[settings.ALGORITHM])

@@ -4,6 +4,7 @@ from schemas.product_schema import ProductCreate
 from fastapi import UploadFile, HTTPException, status
 import uuid
 from firebase.firebase_storage import bucket
+import logging
 
 
 def get_product_by_id(db: Session, product_id: int):
@@ -12,6 +13,11 @@ def get_product_by_id(db: Session, product_id: int):
 
 def get_products(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Product).offset(skip).limit(limit).all()
+
+
+def get_products_category(db: Session, category: str, skip: int = 0, limit: int = 100):
+    return db.query(Product).filter(Product.category ==
+                                    category).offset(skip).limit(limit).all()
 
 
 def create_product_db(db: Session, product: ProductCreate, seller_id: int, image_file: UploadFile):

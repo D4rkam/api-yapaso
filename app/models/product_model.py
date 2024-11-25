@@ -19,6 +19,7 @@ class Product(Base):
     price: Mapped[int] = Column(Float, nullable=False)
     image_url: Mapped[str | None] = Column(String(255), nullable=True)
     quantity: Mapped[int] = Column(Integer, default=1)
+    category: Mapped[str] = Column(String(50), index=True)
 
     orders: Mapped[list["Order"]] = relationship(  # type: ignore
         "Order", secondary=order_products, back_populates="products"

@@ -1,12 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, status, Form
+from fastapi import APIRouter, UploadFile, File, status, Form, Query
 from dependencies import db_dependency, user_dependency, seller_dependency
-from services.product_service import get_products, delete_product, get_product_by_id, create_product_db, upload_image
+from services.product_service import get_products, delete_product, get_product_by_id, create_product_db, get_products_category
 from typing import List
 from schemas.product_schema import Product, ProductCreate
-from security import verify_roles
-from models.user_model import User
-from fastapi import Depends
-from models.seller_model import Seller
+
 
 router = APIRouter(
     prefix="/product",
@@ -24,6 +21,11 @@ async def get_products_list(db: db_dependency, current_user: user_dependency):
     return get_products(db)
 
 
+@router.get("/category/{category}", response_model=List[Product])
+async def get_products_for_category(db: db_dependency, current_user: user_dependency, category: str):
+    return get_products_category(db, category=category)
+
+
 @router.post("/", response_model=Product)
 async def create(db: db_dependency,
                  current_user: seller_dependency,
@@ -31,10 +33,11 @@ async def create(db: db_dependency,
                  desc_product: str = Form(...),
                  price_product: int = Form(...),
                  quantity_product: int = Form(...),
+                 category: str = Form(...),
                  file: UploadFile = File(...)):
 
     product_model = ProductCreate(
-        name=name_product, description=desc_product, price=price_product, quantity=quantity_product)
+        name=name_product, description=desc_product, price=price_product, quantity=quantity_product, category=category)
     return create_product_db(db, product_model, current_user.id, file)
 
 

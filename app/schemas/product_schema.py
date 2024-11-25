@@ -7,6 +7,7 @@ class ProductBase(BaseModel):
     price: int
     image_url: str = None
     quantity: int = 1
+    category: str
 
 
 class ProductForOrder(BaseModel):

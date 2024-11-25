@@ -46,5 +46,5 @@ def create_user_order(db: Session, order: OrderCreate):
     db.refresh(db_order)
 
     order_data = OrderSchema.model_validate(db_order).model_dump()
-    manager.send_new_order(seller_id, order_data)
+    # manager.send_new_order(seller_id, order_data)
     return db_order

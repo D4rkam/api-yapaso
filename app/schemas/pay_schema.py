@@ -11,9 +11,9 @@ class Item(BaseModel):
 class PreferenceProductsRequest(BaseModel):
     items: List[Item]
     back_urls: dict[str, str] = {
-        "success": "https://www.yapaso.com/success",
-        "pending": "https://www.yapaso.com/pending",
-        "failure": "https://www.yapaso.com/failure"
+        "success": "yapaso://payment/success",
+        "pending": "yapaso://payment/pending",
+        "failure": "yapaso://payment/failure"
     }
     currency_id: str = "ARS"
     auto_return: str = "approved"
