@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from schemas.order_schema import Order
-from schemas.token_schema import Token
+from app.schemas.order_schema import Order
+from app.schemas.token_schema import Token
 
 
 class CreateUserRequest(BaseModel):

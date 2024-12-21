@@ -1,10 +1,9 @@
-from models.product_model import Product
+from app.models.product_model import Product
 from sqlalchemy.orm import Session
-from schemas.product_schema import ProductCreate
+from app.schemas.product_schema import ProductCreate
 from fastapi import UploadFile, HTTPException, status
 import uuid
-from firebase.firebase_storage import bucket
-import logging
+from app.firebase.firebase_storage import bucket
 
 
 def get_product_by_id(db: Session, product_id: int):

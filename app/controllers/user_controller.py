@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
-from dependencies import db_dependency, user_dependency
+from app.dependencies import db_dependency, user_dependency
 from typing import List
-from schemas.user_schema import User as UserSchema
-from services.user_service import get_users, add_balance, substract_balance, get_user_by_username
-from security import verify_roles
-from models.user_model import User
+from app.schemas.user_schema import User as UserSchema, ResponseUserDataToken
+from app.services.user_service import get_users, add_balance, substract_balance, get_user_by_username
+from app.security import verify_roles
+from app.models.user_model import User
 from fastapi import Depends
 
 

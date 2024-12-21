@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from database import SessionLocal
+from .database import SessionLocal
 from typing import Annotated
 from fastapi import Depends
-from security import get_current_user, get_current_seller
+from .security import get_current_user, get_current_seller
 
 
 def get_db():

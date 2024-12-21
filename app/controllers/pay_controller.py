@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from services.pay_service import create_preference_products, get_seller_access_token
-from schemas.pay_schema import Item
-from security import verify_roles
-from models.user_model import User
+from app.services.pay_service import create_preference_products, get_seller_access_token
+from app.schemas.pay_schema import Item
+from app.security import verify_roles
+from app.models.user_model import User
 from fastapi import Depends
-from dependencies import db_dependency, user_dependency
-from config import Settings
+from app.dependencies import db_dependency, user_dependency
+from app.config import Settings
 
 
 router = APIRouter(prefix="/pay", tags=["Pagos"])

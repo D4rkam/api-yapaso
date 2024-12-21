@@ -1,22 +1,31 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from models.order_model import Order
-from models.user_model import User
-from models.product_model import Product
-from schemas.order_schema import OrderCreate, Order as OrderSchema
+from app.models.order_model import Order
+from app.models.user_model import User
+from app.models.product_model import Product
+from app.schemas.order_schema import OrderCreate, Order as OrderSchema
 from datetime import datetime
-from manage_websocket import manager
+from app.manage_websocket import manager
 
 
-def get_orders(db: Session, skip: int = 0, limit: int = 100):
+def get_orders(seller_id: int, db: Session, skip: int = 0, limit: int = 100):
     """
     Esta funcion retorna todos los pedidos de la base de datos.
     Esencial para el buffet
     """
-    return db.query(Order).offset(skip).limit(limit).all()
+    orders = (db.query(Order)
+              .filter(Order.seller_id == seller_id)
+              .order_by(Order.datetime_order.desc())
+              .offset(skip)
+              .limit(limit)
+              .all())
+    serializer_orders = [OrderSchema.model_validate(
+        order).model_dump() for order in orders]
+    # print([OrderSchema.model_validate(order).model_dump() for order in orders])
+    return serializer_orders
 
 
-def create_user_order(db: Session, order: OrderCreate):
+async def create_user_order(db: Session, order: OrderCreate):
     """
     Esta funcion crea un pedido para un usuario.
     """
@@ -35,16 +44,16 @@ def create_user_order(db: Session, order: OrderCreate):
         db_product = db.query(Product).filter(Product.id == product.id).first()
         if db_product is None:
             raise HTTPException(status_code=404, detail=f"Producto con id: {
-                                product.id} no encontrado")
+                product.id} no encontrado")
         db_order.products.append(db_product)
 
-    seller_id = db_product.seller_id
-    db_order.seller_id = seller_id
-    db_order.total = sum([product.price for product in db_order.products])
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
+        seller_id = db_product.seller_id
+        db_order.seller_id = seller_id
+        db_order.total = sum([product.price for product in db_order.products])
+        db.add(db_order)
+        db.commit()
+        db.refresh(db_order)
 
-    order_data = OrderSchema.model_validate(db_order).model_dump()
-    # manager.send_new_order(seller_id, order_data)
-    return db_order
+        order_data = OrderSchema.model_validate(db_order).model_dump()
+        await manager.send_to_seller(seller_id, order_data)
+        return db_order

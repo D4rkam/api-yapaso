@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List
-from .product_schema import ProductForOrder, Product
+from app.schemas.product_schema import ProductForOrder, Product
 from datetime import datetime
 
 

@@ -1,8 +1,8 @@
 import mercadopago
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from models.seller_model import Seller
-from schemas.pay_schema import PreferenceProductsRequest, Item
+from app.models.seller_model import Seller
+from app.schemas.pay_schema import PreferenceProductsRequest, Item
 
 
 def create_preference_products(request: list[Item], access_token: str):

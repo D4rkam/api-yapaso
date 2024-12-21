@@ -4,11 +4,11 @@ from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from typing import Annotated
 from sqlalchemy.orm import Session, joinedload
-from models.order_model import Order
-from database import SessionLocal
-from config import settings
-from models.user_model import User
-from models.seller_model import Seller
+from app.models.order_model import Order
+from app.database import SessionLocal
+from app.config import settings
+from app.models.user_model import User
+from app.models.seller_model import Seller
 
 
 bcrypt_context = CryptContext(schemes=["bcrypt"])

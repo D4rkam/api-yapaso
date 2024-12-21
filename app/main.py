@@ -1,14 +1,17 @@
-from fastapi import FastAPI, status
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request, status
+from starlette.responses import JSONResponse
+import signal
 from fastapi.middleware.cors import CORSMiddleware
-from controllers.auth_controller import router as router_auth
-from controllers.user_controller import router as router_user
-from controllers.order_controller import router as router_order
-from controllers.product_controller import router as router_product
-from controllers.pay_controller import router as router_pay
-from database import engine, Base
-from fastapi import WebSocket
-from dependencies import seller_dependency
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from app.controllers.auth_controller import router as router_auth
+from app.controllers.user_controller import router as router_user
+from app.controllers.order_controller import router as router_order
+from app.controllers.product_controller import router as router_product
+from app.controllers.pay_controller import router as router_pay
+from app.controllers.ws_controller import router as router_ws
+from app.database import engine, Base
+from app.logger import access_logger
+import requests as rq
 
 
 app = FastAPI(debug=True)
@@ -19,11 +22,14 @@ app.add_middleware(
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, etc.)
     allow_headers=["*"],  # Permite todas las cabeceras
 )
+# app.add_middleware(HTTPSRedirectMiddleware)
+
 app.include_router(prefix="/api", router=router_auth)
 app.include_router(prefix="/api", router=router_user)
 app.include_router(prefix="/api", router=router_order)
 app.include_router(prefix="/api", router=router_product)
 app.include_router(prefix="/api", router=router_pay)
+app.include_router(prefix="/api", router=router_ws)
 # app.separate_input_output_schemas = True
 
 # Base.metadata.drop_all(bind=engine)
@@ -32,60 +38,42 @@ Base.metadata.create_all(bind=engine)
 app.title = "Ya Paso API"
 
 
+@app.middleware("http")
+async def restrict_ips(request: Request, call_next):
+    client_ip = request.client.host
+    if client_ip == "127.0.0.1" or "181.166.149.116":
+        return await call_next(request)
+
+    resp = rq.get(
+        url=f"https://api.ip2location.io/?key=AE7E86FD037692F0DC975B6FE8C7AEF8&ip={client_ip}")
+    if resp.json()["country_name"] == "Buenos Aires":
+        access_logger.info(f"Access granted for IP: {client_ip}")
+        return await call_next(request)
+
+    access_logger.warning(f"Access denied for IP: {client_ip}")
+    raise JSONResponse(status_code=403, content={
+        "detail": "Access Denied. Your IP is not authorized to access this resource."})
+
+
 @app.get("/", status_code=status.HTTP_200_OK)
 async def home():
-    return {"Gretting": "Bienvenido a la API de Ya Paso"}
+    return {"State": "Ok"}
 
 
-# html = """
-# <!DOCTYPE html>
-# <html>
-#     <head>
-#         <title>Chat</title>
-#     </head>
-#     <body>
-#         <h1>WebSocket Chat</h1>
-#         <form action="" onsubmit="sendMessage(event)">
-#             <input type="text" id="messageText" autocomplete="off"/>
-#             <button>Send</button>
-#         </form>
-#         <ul id='messages'>
-#         </ul>
-#         <script>
-#             var ws = new WebSocket("ws://localhost:8000/ws");
-#             ws.onmessage = function(event) {
-#                 var messages = document.getElementById('messages')
-#                 var message = document.createElement('li')
-#                 var content = document.createTextNode(event.data)
-#                 message.appendChild(content)
-#                 messages.appendChild(message)
-#             };
-#             function sendMessage(event) {
-#                 var input = document.getElementById("messageText")
-#                 ws.send(input.value)
-#                 input.value = ''
-#                 event.preventDefault()
-#             }
-#         </script>
-#     </body>
-# </html>
-# """
+# def handle_exit(signal, frame):
+#     import colorama
+#     print("==================================")
+#     print(f"{colorama.Fore.RED}{
+#           colorama.Style.BRIGHT}[-] Saliendo...{colorama.Fore.RESET}{colorama.Style.RESET_ALL}")
+#     print("==================================")
+#     import sys
+#     sys.exit(0)
 
 
-# @app.get("/socket")
-# async def get():
-#     return HTMLResponse(html)
-
-
-# @app.websocket("/ws")
-# async def get_orders_ws(ws: WebSocket):
-#     await ws.accept()
-#     while True:
-#         data = await ws.receive_text()
-#         await ws.send_text(f"La data del msj fue: {data}")
+# signal.signal(signal.SIGINT, handle_exit)
+# signal.signal(signal.SIGTERM, handle_exit)
 
 
 if __name__ == "__main__":
-    # print("hola")
     import uvicorn
     uvicorn.run(host="0.0.0.0", port=8000, app=app)

@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 from typing import List
-from schemas.order_schema import Order
-from schemas.product_schema import Product
-from schemas.token_schema import Token
+from app.schemas.order_schema import Order
+from app.schemas.product_schema import Product
+from app.schemas.token_schema import Token
 
 
 class LoginSellerRequest(BaseModel):

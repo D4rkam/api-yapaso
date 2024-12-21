@@ -1,7 +1,7 @@
-from database import Base
+from app.database import Base
 from sqlalchemy import Column, Integer, ForeignKey, Table, Float, String, DateTime
 from sqlalchemy.orm import relationship, Mapped, backref
-from .user_model import User
+from app.models.user_model import User
 from datetime import datetime
 
 order_products = Table(

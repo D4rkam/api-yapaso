@@ -1,8 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, status, Form, Query
-from dependencies import db_dependency, user_dependency, seller_dependency
-from services.product_service import get_products, delete_product, get_product_by_id, create_product_db, get_products_category
+from app.dependencies import db_dependency, user_dependency, seller_dependency
+from app.services.product_service import get_products, delete_product, get_product_by_id, create_product_db, get_products_category
 from typing import List
-from schemas.product_schema import Product, ProductCreate
+from app.schemas.product_schema import Product, ProductCreate
 
 
 router = APIRouter(

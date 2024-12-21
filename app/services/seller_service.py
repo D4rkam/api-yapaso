@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.seller_model import Seller
+from app.models.seller_model import Seller
 
 
 def get_seller_by_email(db: Session, email: str):

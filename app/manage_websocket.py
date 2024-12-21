@@ -7,22 +7,22 @@ class WebSocketManager:
     def __init__(self):
         self.active_connections: Dict[int, WebSocket] = {}
 
-    async def connect(self, websocket: WebSocket, seller_id: int):
-        await websocket.accept()
-        self.active_connections[seller_id] = websocket
+    async def connect(self, ws: WebSocket, seller_id: int):
+        await ws.accept()
+        if seller_id not in self.active_connections:
+            self.active_connections[seller_id] = []
+        self.active_connections[seller_id].append(ws)
 
-    def disconnect(self, seller_id: int):
+    def disconnect(self, seller_id: int, ws: WebSocket):
         if seller_id in self.active_connections:
-            del self.active_connections[seller_id]
+            self.active_connections[seller_id].remove(ws)
+            if not self.active_connections[seller_id]:
+                del self.active_connections[seller_id]
 
-    async def send_new_order(self, seller_id: int, order_data: dict):
+    async def send_to_seller(self, seller_id: int, message: str):
         if seller_id in self.active_connections:
-            ws = self.active_connections[seller_id]
-            await ws.send_text(json.dumps(order_data))
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
+            for connection in self.active_connections[seller_id]:
+                await connection.send_text(json.dumps(message))
 
 
 manager = WebSocketManager()

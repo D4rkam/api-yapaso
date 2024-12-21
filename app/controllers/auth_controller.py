@@ -1,17 +1,17 @@
 from fastapi import APIRouter, HTTPException, status
 from datetime import timedelta
 
-from schemas.user_schema import CreateUserRequest, UserLogin, ResponseUserDataToken, UserDataToken
-from schemas.seller_schema import CreateSellerRequest, LoginSellerRequest
-from models.user_model import User
-from models.seller_model import Seller
-from schemas.seller_schema import SellerDataToken
-from schemas.token_schema import Token
-from dependencies import db_dependency
-from services.auth_service import authenticate_user, create_access_token, authenticate_seller, create_access_token_seller
-from security import bcrypt_context
-from services.user_service import get_user_by_username, get_user_by_file_num
-from services.seller_service import get_seller_by_email
+from app.schemas.user_schema import CreateUserRequest, UserLogin, ResponseUserDataToken, UserDataToken
+from app.schemas.seller_schema import CreateSellerRequest, LoginSellerRequest
+from app.models.user_model import User
+from app.models.seller_model import Seller
+from app.schemas.seller_schema import SellerDataToken
+from app.schemas.token_schema import Token
+from app.dependencies import db_dependency
+from app.services.auth_service import authenticate_user, create_access_token, authenticate_seller, create_access_token_seller
+from app.security import bcrypt_context
+from app.services.user_service import get_user_by_username, get_user_by_file_num
+from app.services.seller_service import get_seller_by_email
 
 router = APIRouter(
     prefix="/auth",

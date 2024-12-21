@@ -1,9 +1,9 @@
-from database import Base
+from app.database import Base
 from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.ext.declarative import declared_attr
-from firebase.firebase_storage import bucket
-from .order_model import order_products
+from app.firebase.firebase_storage import bucket
+from app.models.order_model import order_products
 from sqlalchemy import event
 
 

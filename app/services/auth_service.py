@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
-from models.user_model import User
-from models.seller_model import Seller
-from security import bcrypt_context
+from app.models.user_model import User
+from app.models.seller_model import Seller
+from app.security import bcrypt_context
 from datetime import datetime, timedelta
 from jose import jwt
-from config import settings
+from app.config import settings
 
 
 def authenticate_user(username: str, password: str, db: Session):
