@@ -1,14 +1,23 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, URL
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from app.config import settings
 
-user = "root"
-password = ""
-host = "127.0.0.1"
-port = "3307"
-database = "api_test"
+user = settings.DB_USER
+password = settings.DB_PASSWORD
+host = settings.DB_HOST
+port = settings.DB_PORT
+database = settings.DB_DATABASE
 
-SQLALCHEMY_DATABASE_URL = f"mysql://{user}:{password}@{host}:{port}/{database}"
+
+SQLALCHEMY_DATABASE_URL = URL.create(
+    drivername="mysql",
+    username=user,
+    password=password,
+    host=host,
+    port=port,
+    database=database
+)
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
