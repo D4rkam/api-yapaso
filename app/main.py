@@ -1,20 +1,15 @@
 from fastapi import FastAPI, Request, status
 from starlette.responses import JSONResponse
-import signal
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from app.controllers.auth_controller import router as router_auth
-from app.controllers.user_controller import router as router_user
-from app.controllers.order_controller import router as router_order
-from app.controllers.product_controller import router as router_product
-from app.controllers.pay_controller import router as router_pay
-from app.controllers.ws_controller import router as router_ws
 from app.database import engine, Base
 from app.logger import access_logger
+from app.routes import initialize_routes
 import requests as rq
 
 
 app = FastAPI(debug=True)
+
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,15 +17,8 @@ app.add_middleware(
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, etc.)
     allow_headers=["*"],  # Permite todas las cabeceras
 )
-# app.add_middleware(HTTPSRedirectMiddleware)
 
-app.include_router(prefix="/api", router=router_auth)
-app.include_router(prefix="/api", router=router_user)
-app.include_router(prefix="/api", router=router_order)
-app.include_router(prefix="/api", router=router_product)
-app.include_router(prefix="/api", router=router_pay)
-app.include_router(prefix="/api", router=router_ws)
-# app.separate_input_output_schemas = True
+initialize_routes(app)
 
 # Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
@@ -41,7 +29,7 @@ app.title = "Ya Paso API"
 @app.middleware("http")
 async def restrict_ips(request: Request, call_next):
     client_ip = request.client.host
-    if client_ip == "127.0.0.1" or "181.166.149.116":
+    if client_ip in ["127.0.0.1", "181.166.149.116"]:
         return await call_next(request)
 
     resp = rq.get(
@@ -58,22 +46,3 @@ async def restrict_ips(request: Request, call_next):
 @app.get("/", status_code=status.HTTP_200_OK)
 async def home():
     return {"State": "Ok"}
-
-
-# def handle_exit(signal, frame):
-#     import colorama
-#     print("==================================")
-#     print(f"{colorama.Fore.RED}{
-#           colorama.Style.BRIGHT}[-] Saliendo...{colorama.Fore.RESET}{colorama.Style.RESET_ALL}")
-#     print("==================================")
-#     import sys
-#     sys.exit(0)
-
-
-# signal.signal(signal.SIGINT, handle_exit)
-# signal.signal(signal.SIGTERM, handle_exit)
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(host="0.0.0.0", port=8000, app=app)
