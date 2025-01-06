@@ -8,7 +8,7 @@ from datetime import datetime
 from app.manage_websocket import manager
 
 
-def get_orders(seller_id: int, db: Session, skip: int = 0, limit: int = 100):
+async def get_orders(seller_id: int, db: Session, skip: int = 0, limit: int = 100):
     """
     Esta funcion retorna todos los pedidos de la base de datos.
     Esencial para el buffet
@@ -25,7 +25,7 @@ def get_orders(seller_id: int, db: Session, skip: int = 0, limit: int = 100):
     return serializer_orders
 
 
-async def create_user_order(db: Session, order: OrderCreate):
+async def create_user_order(db: Session, order: OrderCreate) -> Order:
     """
     Esta funcion crea un pedido para un usuario.
     """
@@ -54,6 +54,4 @@ async def create_user_order(db: Session, order: OrderCreate):
         db.commit()
         db.refresh(db_order)
 
-        order_data = OrderSchema.model_validate(db_order).model_dump()
-        await manager.send_to_seller(seller_id, order_data)
         return db_order
