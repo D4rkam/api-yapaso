@@ -1,10 +1,9 @@
 from fastapi import APIRouter
-from app.services.pay_service import create_preference_products, get_seller_access_token
+from app.services.pay_service import create_preference_products
 from app.schemas.pay_schema import Item
-from app.security import verify_roles
-from app.models.user_model import User
 from fastapi import Depends
-from app.dependencies import db_dependency, user_dependency
+from app.dependencies.db import db_dependency
+from app.dependencies.security import user_dependency
 from app.config import Settings
 
 
