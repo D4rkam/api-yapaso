@@ -4,19 +4,31 @@ from app.dependencies.db import db_dependency
 from app.dependencies.security import user_dependency
 from app.services.user_service import UserService
 
-router = APIRouter(prefix="/users", tags=["Usuarios"])
 
+class UserController:
+    def __init__(self):
+        self.router = APIRouter(prefix="/users", tags=["Usuarios"])
+        self.router.add_api_route(
+            "/",
+            self.get_current_user,
+            methods=["GET"],
+            status_code=status.HTTP_200_OK,
+        )
+        self.router.add_api_route(
+            "/{username}",
+            self.user_by_username,
+            methods=["GET"],
+            status_code=status.HTTP_200_OK,
+        )
 
-@router.get("/", status_code=status.HTTP_200_OK)
-async def user(current_user: user_dependency):
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="Fallo la autenticación")
+    @staticmethod
+    async def get_current_user(current_user: user_dependency):
+        if current_user is None:
+            raise HTTPException(status_code=401, detail="Fallo la autenticación")
+        return {"User": current_user}
 
-    return {"User": current_user}
-
-
-@router.get("/{username}")
-async def user_for_username(
-    db: db_dependency, username: str, current_user: user_dependency
-):
-    return UserService.get_user_by_username(username)
+    @staticmethod
+    async def user_by_username(
+        db: db_dependency, username: str, current_user: user_dependency
+    ):
+        return UserService(db_session=db).get_user_by_username(username)
