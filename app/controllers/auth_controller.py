@@ -26,16 +26,19 @@ from app.services.auth_service import (
     create_access_token_seller,
 )
 from app.services.seller_service import get_seller_by_email
-from app.services.user_service import get_user_by_file_num, get_user_by_username
+from app.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
 @router.post("/user", status_code=status.HTTP_201_CREATED)
 async def create_user(db: db_dependency, create_user_request: CreateUserRequest):
-    db_user_by_username = get_user_by_username(db, create_user_request.username)
+    user_service = UserService(db_session=db)
+    db_user_by_username = user_service.get_user_by_username(
+        create_user_request.username
+    )
 
-    db_user_by_filenum = get_user_by_file_num(db, create_user_request.file_num)
+    db_user_by_filenum = user_service.get_user_by_file_num(create_user_request.file_num)
 
     if db_user_by_username:
         raise HTTPException(status_code=400, detail="El nombre de usuario ya existe")
