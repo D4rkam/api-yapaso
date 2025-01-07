@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import joinedload
 
@@ -42,8 +43,14 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer
                 detail="Usuario no encontrado.",
             )
 
-        return user.__dict__
-    except jwt.JWTError:
+        return user
+
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="El token ha expirado.",
+        )
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No se pudo validar el usuario.",
