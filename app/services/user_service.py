@@ -1,53 +1,72 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
 from app.models.user_model import User
+from app.repositorys.user_repository import UserRepository
 
 
-def get_user_by_id(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+class UserService:
+    def __init__(self, db_session: Session):
+        self.db_session = db_session
+        self.user_repository = UserRepository(db_session)
 
+    def get_user_by_id(self, user_id: int) -> User:
+        user = self.user_repository.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
-def get_user_by_username(db: Session, username: str):
-    return db.query(User).filter(User.username == username).first()
+    def get_user_by_username(self, username: str) -> User:
+        user = self.user_repository.get_user_by_username(username)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
+    def verify_user_by_username_filenum(self, username: str, filenum: int) -> User:
+        user = self.user_repository.get_user_by_username(username)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-def verify_user_by_username_filenum(db: Session, username: str, filenum: int):
-    return db.query(User).filter(User.username == username and User.file_num == filenum).first()
+        if user.file_num != filenum:
+            raise HTTPException(status_code=400, detail="User not found")
 
+        return user
 
-def get_user_by_file_num(db: Session, file_num_user: int):
-    return db.query(User).filter(User.file_num == file_num_user).first()
+    def get_user_by_file_num(self, file_num_user: int) -> User:
+        user = self.user_repository.get_user_by_file_num(file_num_user)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
 
+    def get_users(self, skip: int = 0, limit: int = 100) -> list[User]:
+        users = self.user_repository.get_all_users(skip=skip, limit=limit)
+        return users
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(User).offset(skip).limit(limit).all()
+    def add_balance(self, mount: float, user_id: int):
+        user = self.user_repository.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
+        user.balance += mount
 
-def add_balance(db: Session, mount: float, user_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        self.db.commit()
+        self.db.refresh(user)
 
-    user.balance += mount
+        return user.balance
 
-    db.commit()
-    db.refresh(user)
+    def substract_balance(self, mount: float, user_id: int):
+        user = self.user_repository.get_user_by_id(user_id)
 
-    return user.balance
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
+        if user.balance - mount >= 0:
+            user.balance -= mount
+        else:
+            raise HTTPException(
+                status_code=500, detail="El saldo no puede ser negativo"
+            )
 
-def substract_balance(db: Session, mount: float, user_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if user.balance - mount >= 0:
-        user.balance -= mount
-    else:
-        raise HTTPException(
-            status_code=500, detail="El saldo no puede ser negativo")
-
-    db.commit()
-    db.refresh(user)
-    return user.balance
+        self.db.commit()
+        self.db.refresh(user)
+        return user.balance
