@@ -4,9 +4,9 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.order_model import Order
-from app.repositorys.order_repository import OrderRepository
-from app.repositorys.product_repository import ProductRepository
-from app.repositorys.user_repository import UserRepository
+from app.repositories.order_repository import OrderRepository
+from app.repositories.product_repository import ProductRepository
+from app.repositories.user_repository import UserRepository
 from app.schemas.order_schema import Order as OrderSchema
 from app.schemas.order_schema import OrderCreate
 
