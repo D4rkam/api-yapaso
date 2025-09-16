@@ -236,14 +236,6 @@ ya-paso-api/
 └── README.md                     # Documentación del proyecto
 ```
 
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
 ## 📝 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
@@ -251,22 +243,3 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 ## 👥 Autores
 
 - **D4rkam** - *Desarrollador inicial* - [D4rkam](https://github.com/D4rkam)
-
-## 🆘 Soporte
-
-Si tienes algún problema o pregunta, por favor:
-
-1. Revisa la documentación
-2. Busca en los issues existentes
-3. Crea un nuevo issue si es necesario
-
-## 📈 Roadmap
-
-- [ ] Implementar tests unitarios y de integración
-- [ ] Agregar documentación de API con ejemplos
-- [ ] Implementar sistema de caché con Redis
-- [ ] Agregar rate limiting
-- [ ] Implementar sistema de notificaciones
-- [ ] Agregar métricas y monitoreo
-- [ ] Implementar CI/CD pipeline
-- [ ] Dockerizar completamente la aplicación
