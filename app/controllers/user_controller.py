@@ -22,7 +22,9 @@ class UserController:
         )
 
     @staticmethod
-    async def get_current_user(current_user: user_dependency):
+    async def get_current_user(
+        current_user: user_dependency,
+    ):
         if current_user is None:
             raise HTTPException(status_code=401, detail="Fallo la autenticación")
         return {"User": current_user}
