@@ -1,5 +1,5 @@
 from app.database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import Mapped, relationship
 
 
@@ -16,8 +16,12 @@ class Seller(Base):
     school_name = Column(String(100), index=True)
     location = Column(String(100), index=True)
     role = Column(String(10), default="seller")
-    access_token = Column(String(255), index=True, nullable=True)
-    refresh_token = Column(String(255), index=True, nullable=True)
+
+    # Tokens de Mercado Pago (encriptados con Fernet)
+    mp_access_token = Column(Text, nullable=True)
+    mp_refresh_token = Column(Text, nullable=True)
+    mp_user_id = Column(Integer, nullable=True)
+    mp_token_expiration = Column(DateTime, nullable=True)
 
     orders: Mapped[list["Order"]] = relationship(  # type: ignore
         "Order", back_populates="seller")

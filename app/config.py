@@ -18,8 +18,10 @@ class Settings(BaseSettings):
     DB_PASSWORD: SecretStr = ""
 
     SECRET_KEY: SecretStr = "supersecretkey"
+    REFRESH_SECRET_KEY: SecretStr = "supersecretrefreshkey"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7  # 7 días en minutos
 
     # CORS y cookies
     CORS_ORIGINS: str = ""  # Separados por coma
@@ -27,6 +29,12 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str = "lax"  # "none" cuando usás túnel (dominios distintos)
 
     MERCADO_PAGO_TOKEN: SecretStr = ""
+
+    # OAuth Mercado Pago
+    MP_CLIENT_ID: str = ""
+    MP_CLIENT_SECRET: SecretStr = ""
+    MP_REDIRECT_URI: str = ""  # Cambiar por la URL real de tu frontend
+    FERNET_KEY: SecretStr = ""  # Generar con: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 
     # class Config:
     #     env_file = "app/.env"  # Asegura que cargue el archivo .env

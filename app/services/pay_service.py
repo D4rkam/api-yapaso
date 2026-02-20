@@ -26,7 +26,9 @@ def verify_seller(seller_id: int, db: Session):
 
 def get_seller_access_token(seller_id: int, db: Session):
     seller = verify_seller(seller_id, db)
-    if seller.access_token is None:
+    if seller.mp_access_token is None:
         raise HTTPException(
-            status_code=400, detail="Seller does not have access token")
-    return seller.access_token
+            status_code=400, detail="El vendedor no tiene vinculada su cuenta de Mercado Pago")
+
+    from app.services.mp_oauth_service import decrypt_token
+    return decrypt_token(seller.mp_access_token)
