@@ -21,6 +21,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # CORS y cookies
+    CORS_ORIGINS: str = ""  # Separados por coma
+    COOKIE_SECURE: bool = False  # True cuando usás túnel/HTTPS
+    COOKIE_SAMESITE: str = "lax"  # "none" cuando usás túnel (dominios distintos)
+
     MERCADO_PAGO_TOKEN: SecretStr = ""
 
     # class Config:
