@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # Servicio de la API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yapaso-api
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=yapaso_db
+      - DB_USER=yapaso_user
+      - DB_PASSWORD=yapaso_password
+      - SECRET_KEY=supersecretkey_change_in_production
+      - APP_DEBUG=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app:ro  # Solo lectura para desarrollo
+    networks:
+      - yapaso-network
+    restart: unless-stopped
+
+  # Servicio de base de datos MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: yapaso-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: yapaso_db
+      MYSQL_USER: yapaso_user
+      MYSQL_PASSWORD: yapaso_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+      interval: 30s
+    networks:
+      - yapaso-network
+    restart: unless-stopped
+
+  # Servicio de phpMyAdmin (opcional, para desarrollo)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: yapaso-phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: yapaso_user
+      PMA_PASSWORD: yapaso_password
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - yapaso-network
+    restart: unless-stopped
+    profiles:
+      - development
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  yapaso-network:
+    driver: bridge

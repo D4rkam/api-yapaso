@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.firebase.firebase_storage import bucket
 from app.models.product_model import Product
-from app.repositorys.product_repository import ProductRepository
+from app.repositories.product_repository import ProductRepository
 from app.schemas.product_schema import ProductCreate
 
 

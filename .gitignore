@@ -163,3 +163,58 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+# ==========================================
+# Ya Paso API - Archivos específicos
+# ==========================================
+
+# Archivos de entorno
+app/.env
+.env.local
+.env.production
+
+# Archivos de Firebase
+app/firebase/*.json
+*.serviceAccountKey.json
+login.json
+
+# Backups de base de datos
+*.sql
+backup_*.sql
+
+# Logs de la aplicación
+logs/
+*.log
+
+# Archivos de desarrollo
+.vscode/
+.idea/
+
+# Cobertura de tests
+htmlcov/
+.coverage
+coverage.xml
+
+# Archivos temporales de desarrollo
+temp/
+tmp/
+.temp/
+
+# Docker
+.dockerignore
+
+# Archivos de sistema macOS
+.DS_Store
+
+# Archivos de Windows
+Thumbs.db
+ehthumbs.db
+
+# Archivos de desarrollo local
+local_settings.py
+dev_settings.py
+
+# Certificados SSL
+*.pem
+*.key
+*.crt
