@@ -1,5 +1,4 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Cookie, HTTPException, status
 from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
@@ -9,17 +8,25 @@ from app.config import get_settings
 from app.dependencies.db import db_dependency
 
 bcrypt_context = CryptContext(schemes=["bcrypt"])
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="api/auth/token")
 
 
-async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer)):
+async def get_current_user(
+    db: db_dependency,
+    session_token_user: str = Cookie(None),
+):
     from app.models.order_model import Order
     from app.models.user_model import User
 
     settings = get_settings()
+
+    if session_token_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No se proporcionó el token de sesión del usuario.",
+        )
     try:
         payload = jwt.decode(
-            token,
+            session_token_user,
             settings.SECRET_KEY.get_secret_value(),
             algorithms=[settings.ALGORITHM],
         )
@@ -57,13 +64,23 @@ async def get_current_user(db: db_dependency, token: str = Depends(oauth2_bearer
         )
 
 
-async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bearer)):
+# Cambiar Oauth2PasswordBearer a un token en cookie para vendedores
+async def get_current_seller(
+    db: db_dependency, session_token_seller: str = Cookie(None)
+):
     from app.models.seller_model import Seller
+
+    if session_token_seller is None:
+        print("No se proporcionó el token de sesión del vendedor.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No se proporcionó el token de sesión del vendedor.",
+        )
 
     settings = get_settings()
     try:
         payload = jwt.decode(
-            token,
+            session_token_seller,
             settings.SECRET_KEY.get_secret_value(),
             algorithms=[settings.ALGORITHM],
         )
@@ -82,7 +99,12 @@ async def get_current_seller(db: db_dependency, token: str = Depends(oauth2_bear
                 detail="Vendedor no encontrado.",
             )
         return seller
-    except jwt.JWTError:
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="El token del vendedor ha expirado.",
+        )
+    except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No se pudo validar el vendedor.",

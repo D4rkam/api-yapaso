@@ -1,8 +1,9 @@
-from pydantic import BaseModel
 from typing import List
+
+from pydantic import BaseModel
+
 from app.schemas.order_schema import Order
 from app.schemas.product_schema import Product
-from app.schemas.token_schema import Token
 
 
 class LoginSellerRequest(BaseModel):
@@ -22,16 +23,11 @@ class Seller(CreateSellerRequest):
     """
     Seller schema for SQLAlchemy.
     """
+
     id: int
-    # access_token_mp: str
-    # refresh_token_mp: str
     orders: List[Order]
     products: List[Product]
 
     class Config:
         from_attributes = True
         arbitrary_types_allowed = True
-
-
-class SellerDataToken(Seller):
-    token: Token

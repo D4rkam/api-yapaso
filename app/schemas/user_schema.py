@@ -1,7 +1,8 @@
+from typing import List
+
 from pydantic import BaseModel
-from typing import List, Optional
+
 from app.schemas.order_schema import Order
-from app.schemas.token_schema import Token
 
 
 class CreateUserRequest(BaseModel):
@@ -31,11 +32,3 @@ class User(CreateUserRequest):
     class Config:
         from_attributes = True
         arbitrary_types_allowed = True
-
-
-class UserDataToken(User):
-    token: Token
-
-
-class ResponseUserDataToken(BaseModel):
-    user: UserDataToken

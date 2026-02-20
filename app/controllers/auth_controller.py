@@ -1,29 +1,24 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Cookie, HTTPException, Response, status
 
+from app.config import get_settings
 from app.dependencies.db import db_dependency
 from app.dependencies.settings import settings_dependency
 from app.models.seller_model import Seller
 from app.models.user_model import User
-from app.schemas.seller_schema import (
-    CreateSellerRequest,
-    LoginSellerRequest,
-    SellerDataToken,
-)
-from app.schemas.token_schema import Token
-from app.schemas.user_schema import (
-    CreateUserRequest,
-    ResponseUserDataToken,
-    UserDataToken,
-    UserLogin,
-)
+from app.schemas.seller_schema import CreateSellerRequest, LoginSellerRequest
+from app.schemas.seller_schema import Seller as SellerSchema
+from app.schemas.user_schema import CreateUserRequest, UserLogin
+from app.schemas.user_schema import User as UserSchema
 from app.security import bcrypt_context
 from app.services.auth_service import (
     authenticate_seller,
     authenticate_user,
     create_access_token,
     create_access_token_seller,
+    create_refresh_token,
+    refresh_access_token,
 )
 from app.services.seller_service import get_seller_by_email
 from app.services.user_service import UserService
@@ -58,9 +53,12 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     db.commit()
 
 
-@router.post("/user/login", response_model=ResponseUserDataToken)
-async def login_for_access_token(
-    form_user: UserLogin, db: db_dependency, settings: settings_dependency
+@router.post("/user/login", response_model=UserSchema)
+async def login_user(
+    form_user: UserLogin,
+    db: db_dependency,
+    settings: settings_dependency,
+    response: Response,
 ):
     form_user = authenticate_user(form_user.username, form_user.password, db)
     if not form_user:
@@ -70,7 +68,30 @@ async def login_for_access_token(
     token = create_access_token(
         form_user.username, form_user.id, timedelta(days=30), settings
     )
-    user_data = UserDataToken(
+
+    refresh_token = create_refresh_token(form_user.username, form_user.id, settings)
+
+    cookie_settings = get_settings()
+    response.set_cookie(
+        key="session_token_user",
+        value=token,
+        httponly=True,
+        max_age=15 * 60,
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=7 * 24 * 60 * 60,
+        path="/api/auth/refresh-token",
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+    user_data = UserSchema(
         id=form_user.id,
         name=form_user.name,
         last_name=form_user.last_name,
@@ -79,10 +100,9 @@ async def login_for_access_token(
         file_num=str(form_user.file_num),
         orders=form_user.orders,
         balance=form_user.balance,
-        token=Token(access_token=token, token_type="bearer"),
         role=form_user.role,
     )
-    return ResponseUserDataToken(user=user_data)
+    return user_data
 
 
 @router.post("/seller", status_code=status.HTTP_201_CREATED)
@@ -105,9 +125,12 @@ async def create_seller(create_seller_request: CreateSellerRequest, db: db_depen
     db.commit()
 
 
-@router.post("/seller/login", response_model=SellerDataToken)
+@router.post("/seller/login", response_model=SellerSchema)
 async def login_seller(
-    form_seller: LoginSellerRequest, db: db_dependency, settings: settings_dependency
+    response: Response,
+    form_seller: LoginSellerRequest,
+    db: db_dependency,
+    settings: settings_dependency,
 ):
     seller_auth = authenticate_seller(form_seller.email, form_seller.password, db)
     if not seller_auth:
@@ -118,7 +141,31 @@ async def login_seller(
         seller_auth.email, seller_auth.id, timedelta(days=30), settings
     )
 
-    seller_data = SellerDataToken(
+    refresh_token = create_refresh_token(
+        seller_auth.email, seller_auth.id, settings, is_seller=True
+    )
+
+    cookie_settings = get_settings()
+    response.set_cookie(
+        key="session_token_seller",
+        value=token,
+        httponly=True,
+        max_age=15 * 60,
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=7 * 24 * 60 * 60,
+        path="/api/auth/refresh-token-seller",
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+    seller_data = SellerSchema(
         id=seller_auth.id,
         email=seller_auth.email,
         password=seller_auth.hashed_password,
@@ -127,8 +174,60 @@ async def login_seller(
         location=seller_auth.location,
         orders=seller_auth.orders,
         products=seller_auth.products,
-        token=Token(access_token=token, token_type="bearer"),
         role=seller_auth.role,
     )
 
     return seller_data
+
+
+@router.post("/refresh-token", status_code=status.HTTP_201_CREATED)
+async def refresh_token(
+    response: Response, settings: settings_dependency, refresh_token: str = Cookie(None)
+):
+
+    if refresh_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No se proporcionó el token de actualización",
+        )
+    new_token = refresh_access_token(refresh_token, settings=settings)
+    cookie_settings = get_settings()
+    response.set_cookie(
+        key="session_token",
+        value=new_token,
+        httponly=True,
+        max_age=30 * 24 * 60 * 60,
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+
+@router.post("/refresh-token-seller", status_code=status.HTTP_201_CREATED)
+async def refresh_token_seller(
+    response: Response, settings: settings_dependency, refresh_token: str = Cookie(None)
+):
+
+    if refresh_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No se proporcionó el token de actualización",
+        )
+    new_token = refresh_access_token(refresh_token, is_seller=True, settings=settings)
+    cookie_settings = get_settings()
+    response.set_cookie(
+        key="session_token_seller",
+        value=new_token,
+        httponly=True,
+        max_age=30 * 24 * 60 * 60,
+        secure=cookie_settings.COOKIE_SECURE,
+        samesite=cookie_settings.COOKIE_SAMESITE,
+    )
+
+
+@router.post("/logout", status_code=status.HTTP_200_OK)
+async def logout(response: Response):
+    response.delete_cookie(key="session_token_user", path="/")
+    response.delete_cookie(key="session_token_seller", path="/")
+    response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token")
+    response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token-seller")
+    return {"message": "Sesión cerrada exitosamente"}
