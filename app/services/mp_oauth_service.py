@@ -176,9 +176,7 @@ async def unlink_mp_account(seller: Seller, db: Session) -> None:
     logger.info(f"Cuenta de MP desvinculada para seller_id={seller.id}")
 
 
-async def unlink_mp_account_by_mp_user_id(
-    mp_user_id: int, db: Session
-) -> int | None:
+async def unlink_mp_account_by_mp_user_id(mp_user_id: int, db: Session) -> int | None:
     """
     Desvincula la cuenta de MP a partir del mp_user_id.
     Usado cuando MP notifica la revocación del grant.
