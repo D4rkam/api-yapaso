@@ -9,6 +9,8 @@ from app.controllers.pay_controller import router as router_pay
 from app.controllers.product_controller import ProductController
 from app.controllers.seller_controller import SellerController
 from app.controllers.user_controller import UserController
+from app.controllers.ws_controller import router as router_ws
+from app.controllers.notification_controller import router as router_notifications
 
 
 def initialize_routes(app: FastAPI) -> None:
@@ -22,3 +24,5 @@ def initialize_routes(app: FastAPI) -> None:
     app.include_router(prefix=api_prefix, router=ProductController().router)
     app.include_router(prefix=api_prefix, router=router_pay)
     app.include_router(prefix=api_prefix, router=router_mp_oauth)
+    app.include_router(prefix=api_prefix, router=router_ws)
+    app.include_router(prefix=api_prefix, router=router_notifications)
