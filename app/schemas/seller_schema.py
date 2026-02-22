@@ -27,6 +27,27 @@ class Seller(CreateSellerRequest):
     id: int
     orders: List[Order]
     products: List[Product]
+    mp_linked: bool
+
+    class Config:
+        from_attributes = True
+        arbitrary_types_allowed = True
+
+
+class SellerResponse(BaseModel):
+    """
+    Schema de respuesta para el frontend.
+    Excluye datos sensibles (tokens de MP, password, etc.).
+    """
+
+    id: int
+    email: str
+    name_store: str
+    school_name: str
+    location: str
+    orders: List[Order]
+    products: List[Product]
+    mp_linked: bool
 
     class Config:
         from_attributes = True

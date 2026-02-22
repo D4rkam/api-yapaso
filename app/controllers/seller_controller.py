@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from app.dependencies.security import seller_dependency
+from app.schemas.seller_schema import SellerResponse
 
 
 class SellerController:
@@ -11,6 +12,7 @@ class SellerController:
             self.get_current_seller,
             methods=["GET"],
             status_code=status.HTTP_200_OK,
+            response_model=dict[str, SellerResponse],
         )
 
     @staticmethod

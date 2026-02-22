@@ -21,3 +21,9 @@ class MPAuthURLResponse(BaseModel):
 
     auth_url: str
     code_verifier: str  # El frontend debe guardarlo y enviarlo en el callback
+
+
+class MPUnlinkResponse(BaseModel):
+    """Respuesta al desvincular la cuenta de MP."""
+
+    message: str

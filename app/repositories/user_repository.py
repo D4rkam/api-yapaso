@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from sqlalchemy.orm import Session
+
 from app.models.user_model import User
 
 
@@ -17,7 +19,9 @@ class UserRepository:
         return self.db_session.query(User).filter(User.username == username).first()
 
     def get_user_by_file_num(self, file_num_user: int) -> Optional[User]:
-        return self.db_session.query(User).filter(User.file_num == file_num_user).first()
+        return (
+            self.db_session.query(User).filter(User.file_num == file_num_user).first()
+        )
 
     def add_user(self, user: User) -> User:
         self.db_session.add(user)
@@ -33,5 +37,7 @@ class UserRepository:
     def delete_user(self, user_id: int) -> None:
         user = self.get_user_by_id(user_id)
         if user:
+            self.db_session.delete(user)
+            self.db_session.commit()
             self.db_session.delete(user)
             self.db_session.commit()

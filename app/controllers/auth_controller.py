@@ -7,10 +7,14 @@ from app.dependencies.db import db_dependency
 from app.dependencies.settings import settings_dependency
 from app.models.seller_model import Seller
 from app.models.user_model import User
-from app.schemas.seller_schema import CreateSellerRequest, LoginSellerRequest
-from app.schemas.seller_schema import Seller as SellerSchema
-from app.schemas.user_schema import CreateUserRequest, UserLogin
+from app.schemas.seller_schema import (
+    CreateSellerRequest,
+    LoginSellerRequest,
+    SellerResponse,
+)
+from app.schemas.user_schema import CreateUserRequest
 from app.schemas.user_schema import User as UserSchema
+from app.schemas.user_schema import UserLogin
 from app.security import bcrypt_context
 from app.services.auth_service import (
     authenticate_seller,
@@ -125,7 +129,7 @@ async def create_seller(create_seller_request: CreateSellerRequest, db: db_depen
     db.commit()
 
 
-@router.post("/seller/login", response_model=SellerSchema)
+@router.post("/seller/login", response_model=SellerResponse)
 async def login_seller(
     response: Response,
     form_seller: LoginSellerRequest,
@@ -165,17 +169,7 @@ async def login_seller(
         samesite=cookie_settings.COOKIE_SAMESITE,
     )
 
-    seller_data = SellerSchema(
-        id=seller_auth.id,
-        email=seller_auth.email,
-        password=seller_auth.hashed_password,
-        name_store=seller_auth.name_store,
-        school_name=seller_auth.school_name,
-        location=seller_auth.location,
-        orders=seller_auth.orders,
-        products=seller_auth.products,
-        role=seller_auth.role,
-    )
+    seller_data = SellerResponse.model_validate(seller_auth)
 
     return seller_data
 
@@ -227,6 +221,10 @@ async def refresh_token_seller(
 @router.post("/logout", status_code=status.HTTP_200_OK)
 async def logout(response: Response):
     response.delete_cookie(key="session_token_user", path="/")
+    response.delete_cookie(key="session_token_seller", path="/")
+    response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token")
+    response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token-seller")
+    return {"message": "Sesión cerrada exitosamente"}
     response.delete_cookie(key="session_token_seller", path="/")
     response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token")
     response.delete_cookie(key="refresh_token", path="/api/auth/refresh-token-seller")

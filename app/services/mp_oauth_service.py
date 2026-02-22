@@ -143,6 +143,69 @@ async def exchange_code_for_tokens(
         raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
 
 
+async def unlink_mp_account(seller: Seller, db: Session) -> None:
+    """
+    Desvincula la cuenta de Mercado Pago del vendedor.
+
+    NOTA: La API de Mercado Pago NO expone un endpoint público para revocar
+    grants OAuth programáticamente. Los grant_type válidos en /oauth/token son
+    únicamente: authorization_code, refresh_token y client_credentials.
+
+    La revocación en MP ocurre cuando:
+    - El token expira (180 días).
+    - El vendedor revoca la autorización desde su cuenta de MP.
+    - El vendedor cambia su contraseña en MP.
+
+    Por lo tanto, al desvincular desde nuestra app, solo limpiamos los datos
+    locales. Si el vendedor revoca desde MP, el webhook /mp/webhooks captura
+    la notificación y sincroniza el estado.
+    """
+    if not seller.mp_access_token:
+        raise HTTPException(
+            status_code=400,
+            detail="El vendedor no tiene una cuenta de Mercado Pago vinculada",
+        )
+
+    # Limpiar datos locales sin importar si MP respondió OK
+    seller.mp_access_token = None
+    seller.mp_refresh_token = None
+    seller.mp_user_id = None
+    seller.mp_token_expiration = None
+    db.commit()
+
+    logger.info(f"Cuenta de MP desvinculada para seller_id={seller.id}")
+
+
+async def unlink_mp_account_by_mp_user_id(
+    mp_user_id: int, db: Session
+) -> int | None:
+    """
+    Desvincula la cuenta de MP a partir del mp_user_id.
+    Usado cuando MP notifica la revocación del grant.
+    Retorna el seller_id si se encontró, None si no.
+    """
+    seller = db.query(Seller).filter(Seller.mp_user_id == mp_user_id).first()
+    if not seller:
+        logger.warning(
+            f"Notificación de revocación de MP para mp_user_id={mp_user_id} "
+            "pero no se encontró un vendedor asociado"
+        )
+        return None
+
+    seller_id = seller.id
+    seller.mp_access_token = None
+    seller.mp_refresh_token = None
+    seller.mp_user_id = None
+    seller.mp_token_expiration = None
+    db.commit()
+
+    logger.info(
+        f"Cuenta de MP desvinculada por webhook para seller_id={seller_id}, "
+        f"mp_user_id={mp_user_id}"
+    )
+    return seller_id
+
+
 async def refresh_mp_token(seller: Seller, db: Session, settings: Settings) -> str:
     """
     Renueva el access_token de MP usando el refresh_token almacenado.
